@@ -1,0 +1,11 @@
+
+body{
+    background-image: url("../images/bg.png");    
+    /* background-position: top left;     */
+    background-color: #e2e2e2;    
+    background-repeat: repeat;    
+}
+.selection:hover {
+    cursor: pointer;    
+    border: 2px solid #d2d2d2;
+}
