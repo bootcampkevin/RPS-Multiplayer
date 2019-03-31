@@ -1,8 +1,10 @@
 $(document).ready(function () {
   //
-  ////TODO Make FIREBASE update
-  //seems to be an issue with picking the last selected choice, doesn't change and therefore doesnt trigger event
-  //SEE makeSelection() TODO part! 
+  //MAJOR TODOs:
+  //TODO hitting twice so score goes up 2 per win/loss
+      //can hack the scores by dividing by 2 to mask the issue. 
+      // tried moving it in the on pick selection, same issue  
+  //
   //
   //Global Variables, then Objects, then Function Calls, yo.
   $('#chat-inputs').hide();
@@ -15,12 +17,16 @@ $(document).ready(function () {
   var playerTwo = database.ref('players/playerTwo');
   var playerTwoPick = database.ref('players/playerTwo/pick');
   var playerTurn = database.ref('turn');
+  var chatArea = database.ref('chat');
 
   var player = { id: '', name: '' };
   var numberOfPlayers = 0;
   var turn = 1;
   var player1pick = '';
   var player2pick = '';
+  var score1 = 0;
+  var score2 =0;
+  var delay = 3;
 
   var rockSVG = 'assets/images/rock.svg';
   var paperSVG = 'assets/images/paper-bl.svg';
@@ -135,7 +141,16 @@ $(document).ready(function () {
     newThrow();
 
   });
-
+  players.on('child_added', function(snapshot) {
+    //reset the player's scores when a player joins
+    if (numberOfPlayers >= 1) {
+      score1 = 0;
+      score2 = 0;
+  
+      playerOne.update({win: 0, loss: 0});
+      playerTwo.update({win: 0, loss: 0});
+    }
+  });
 
   playerTurn.on('value', function (snapshot) {
     var gameTurn = snapshot.val();
@@ -143,7 +158,7 @@ $(document).ready(function () {
     //TODO fix game flag and change options
     if (gameTurn === 1) {
       console.log('GT: ' + gameTurn);
-      $('#player-middle-div').removeClass('mid');
+      $('#player-middle-div').addClass('mid');
       $('#player-left-div').removeClass('stop');
       $('#player-left-div').addClass('go');
       $('#player-right-div').removeClass('go');
@@ -176,12 +191,14 @@ $(document).ready(function () {
       console.log('GT: ' + gameTurn);
       $('#player-left-div').removeClass('stop');
       $('#player-right-div').removeClass('go');
-      $('#player-middle-div').addClass('go');
-      $('#notification').html('Waiting for game logic to work.');
-      console.log(player1pick);
-      console.log(player2pick);
+      // $('#player-middle-div').addClass('mid');
+      $('#player-middle-div').html('<div class="card w-100 h-100 p-2">Player1 picked: ' + player1pick.toUpperCase() + ' & Player2 picked: ' + player2pick.toUpperCase() + ' </div>');
+      // console.log(player1pick);
+      // console.log(player2pick);
 
-      //TODO add the game logic     
+      //TODO hitting twice so score goes up 2 per win/loss
+      //can hack the scores by dividing by 2 to mask the issue. 
+      // tried moving it in the on pick selection, same issue        
       checkForWin();
     }
   });
@@ -190,48 +207,49 @@ $(document).ready(function () {
     // console.log('compare');
 
 
-    // if ((player1pick !== null) && (player2pick !== null)) {
+    if ((player1pick !== null) && (player2pick !== null)) {
 
     if (player1pick === player2pick) {
       console.log('tie!');
       // console.log('turn:' + turn);
       turn = 1;
       playerTurn.set(turn);
-      setTimeout(setupGame, 1000 * 3);
+      setTimeout(newThrow, 1000 * delay);
 
     }
     else if (((player1pick === 'rock') && (player2pick === 'scissors')) || ((player1pick === 'paper') && (player2pick === 'rock')) || ((player1pick === 'scissors') && (player2pick === 'paper'))) {
 
       console.log('player 1 wins!');
-      // console.log('turn:' + turn);
-      // score1++;
-
-      // playerOne.update({ win: score1 });
-      // playerTwo.update({ loss: score1 });
+      
+      score1++;
+      
+      playerOne.update({ win: score1 });
+      playerTwo.update({ loss: score1 });
 
       turn = 1;
       playerTurn.set(turn);
-      setTimeout(setupGame, 1000 * 3);
+      setTimeout(newThrow, 1000 * delay);
+      
 
     }
     else if (((player2pick === 'rock') && (player1pick === 'scissors')) || ((player2pick === 'paper') && (player1pick === 'rock')) || ((player2pick === 'scissors') && (player1pick === 'paper'))) {
 
-      console.log('player 2 wins!');
-      // console.log('turn:' + turn);
+      console.log('player 2 wins!');      
 
-      // score2++;
+      score2++;
 
-      // playerTwo.update({ win: score2 });
-      // playerOne.update({ loss: score2 });
+      playerTwo.update({ win: score2 });
+      playerOne.update({ loss: score2 });
+
       turn = 1;
       playerTurn.set(turn);
-      setTimeout(setupGame, 1000 * 3);
-
+      setTimeout(newThrow, 1000 * delay);
+      
     }
     else {
-      console.log('broken logic');
+      // console.log('broken logic');
     }
-    // }
+    }
 
 
   }
@@ -277,28 +295,28 @@ $(document).ready(function () {
   //Get the pick from DB for player one
   playerOnePick.on('value', function (snapshot) {
     player1pick = snapshot.val();
-    console.log('p1picksnapshot: ' + player1pick);
+    // console.log('p1picksnapshot: ' + player1pick);
     //lag seems to be an issue with pick too quickly on firebase.
     //pick doesn't change if player picks the same choice as last choice.
+    //remove() pick from firebase to fix issue. 
     if (player1pick){    
     updateTurn();
-    }
+    }    
   });
 
   //Get the pick from DB for player two
   playerTwoPick.on('value', function (snapshot) {
     player2pick = snapshot.val();
-    console.log('p2picksnapshot: ' + player2pick);
+    // console.log('p2picksnapshot: ' + player2pick);
     if (player2pick){    
       updateTurn();
-    }    
-    
+    }
   });
 
   function makeSelection() {
-    console.log($(this).attr('data-name'));
-    console.log('player id: '+ player.id);
-    console.log('turn: '+ turn);
+    // console.log($(this).attr('data-name'));
+    // console.log('player id: '+ player.id);
+    // console.log('turn: '+ turn);
 
     let currentPick = $(this).attr('data-name');
     if (numberOfPlayers === 2) {
@@ -316,23 +334,19 @@ $(document).ready(function () {
         playerTwoPick.set(currentPick);       
       }
       else {
-        console.log('broken selection');
+        // console.log('broken selection');
       }      
     }
   }
 
   function newThrow() {
-    //remove data on firsebase
+    //remove the picks on firebase to solve issue or not being able to select the same choice twice.
     playerOnePick.remove();
     playerTwoPick.remove();
 
-    //clear player picks
+    //clear out the player picks
     player1pick = '';
     player2pick = '';
-
-    //reset turn and push to change firebase
-    turn = 1;
-    playerTurn.set(turn);
 
     //reset the imageDivs
     setupGame();
