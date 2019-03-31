@@ -35,6 +35,7 @@ $(document).ready(function () {
   function setupGame() {
     // turn = 1;
     // playerTurn.set(turn);
+    $('#player-middle-div').html('');
     if (player.id === 'playerOne') {
       let div = makeImageDivs();
       $('#player-left-div').html(div);
@@ -43,6 +44,8 @@ $(document).ready(function () {
       let div = makeImageDivs();
       $('#player-right-div').html(div);
     }
+    
+    $('#score').html('Player1 Wins: ' + score1 + ' & Player2 Wins: ' + score2);
   }
 
   function makeImageDivs() {
@@ -76,7 +79,6 @@ $(document).ready(function () {
     }
     else {
       $('#sign-in').remove();
-
       $('#chat-inputs').show();
 
       createNewPlayer(name);
@@ -85,7 +87,7 @@ $(document).ready(function () {
   }
 
   function createNewPlayer(name) {
-    //TODO come back to fix
+    
     if ((numberOfPlayers === 0) || ((numberOfPlayers === 1) && (currentPlayer.hasOwnProperty('playerTwo')))) {
       playerOne.set({
         name: name,
@@ -115,8 +117,7 @@ $(document).ready(function () {
     }
   }
 
-  players.on("value", function (snapshot) {
-    //find the number of connections
+  players.on("value", function (snapshot) {    
     //TODO play more than one game at a time
     numberOfPlayers = snapshot.numChildren();
     $('#connections').text(numberOfPlayers);
@@ -131,13 +132,19 @@ $(document).ready(function () {
   // upon a player when disconnected, reset
   players.on('child_removed', function (snapshot) {
     // reset the turn if a player leaves the game
-    turn = 1;
-    playerTurn.set(turn);
-    //TODO clear all the divs
+    // turn = 1;
+    // playerTurn.set(turn);
+    playerTurn.remove();
+    chatArea.remove();
+    //TODO double check on clear all the divs
+    score1=0;
+    score2=0;
     $('#player-left-div').empty();
     $('#player-middle-div').empty();
     $('#player-right-div').empty();
     $('#notification').html('');
+    $('#score').html('');
+    $('#result').html('');
     newThrow();
 
   });
@@ -157,7 +164,7 @@ $(document).ready(function () {
 
     //TODO fix game flag and change options
     if (gameTurn === 1) {
-      console.log('GT: ' + gameTurn);
+      // console.log('GT: ' + gameTurn);
       $('#player-middle-div').addClass('mid');
       $('#player-left-div').removeClass('stop');
       $('#player-left-div').addClass('go');
@@ -165,30 +172,30 @@ $(document).ready(function () {
       $('#player-right-div').addClass('stop');
 
       if (player.id === 'playerOne') {
-        $('#notification').html('It\'s your turn!');
+        $('#notification').html('<span class="">It\'s your turn!</span>');
       }
       else {
-        $('#notification').html('Waiting for Player 1...');
+        $('#notification').html('<span class="">Waiting for Player 1...</span>');
       }
     }
 
     if (gameTurn === 2) {
-      console.log('GT: ' + gameTurn);
+      // console.log('GT: ' + gameTurn);
       $('#player-left-div').removeClass('go');
       $('#player-left-div').addClass('stop');
       $('#player-right-div').removeClass('stop');
       $('#player-right-div').addClass('go');
 
       if (player.id === 'playerTwo') {
-        $('#notification').html('It\'s your turn!');
+        $('#notification').html('<span class="">It\'s your turn!</span>');
       }
       else {
-        $('#notification').html('Waiting for Player 2...');
+        $('#notification').html('<span class="">Waiting for Player 2...</span>');
       }
     }
 
     if (gameTurn === 3) {
-      console.log('GT: ' + gameTurn);
+      // console.log('GT: ' + gameTurn);
       $('#player-left-div').removeClass('stop');
       $('#player-right-div').removeClass('go');
       // $('#player-middle-div').addClass('mid');
@@ -210,7 +217,7 @@ $(document).ready(function () {
     if ((player1pick !== null) && (player2pick !== null)) {
 
     if (player1pick === player2pick) {
-      console.log('tie!');
+      $('#result').html('<span class="">It\'s a Tie!</span>');
       // console.log('turn:' + turn);
       turn = 1;
       playerTurn.set(turn);
@@ -219,7 +226,7 @@ $(document).ready(function () {
     }
     else if (((player1pick === 'rock') && (player2pick === 'scissors')) || ((player1pick === 'paper') && (player2pick === 'rock')) || ((player1pick === 'scissors') && (player2pick === 'paper'))) {
 
-      console.log('player 1 wins!');
+      $('#result').html('<span class="">Player 1 Wins!</span>');
       
       score1++;
       
@@ -234,7 +241,7 @@ $(document).ready(function () {
     }
     else if (((player2pick === 'rock') && (player1pick === 'scissors')) || ((player2pick === 'paper') && (player1pick === 'rock')) || ((player2pick === 'scissors') && (player1pick === 'paper'))) {
 
-      console.log('player 2 wins!');      
+      $('#result').html('<span class="">Player 2 Wins!</span>');      
 
       score2++;
 
@@ -322,11 +329,7 @@ $(document).ready(function () {
     if (numberOfPlayers === 2) {
       if ((player.id === 'playerOne') && (turn === 1)) {
         
-        toggleImg(1, currentPick);
-        //TODO Make FIREBASE update
-        //seems to be an issue with picking the last selected choice, doesn't change and therefore doesnt trigger event
-        // let tmp = '0';
-        // playerOnePick.set(tmp);
+        toggleImg(1, currentPick);        
         playerOnePick.set(currentPick);        
       }
       else if ((player.id === 'playerTwo') && (turn === 2)) {        
@@ -348,14 +351,35 @@ $(document).ready(function () {
     player1pick = '';
     player2pick = '';
 
-    //reset the imageDivs
+    //reset the imageDivs via setup
     setupGame();
   }
 
   function sendChat() {
     console.log('Send Chat');
-
+    let text = $('#chat-input').val().trim();
+    $('#chat-input').val('');
+    if (text.length > 0) {
+      let chat = `${player.name}: ${text}`;
+      if (player.id === 'playerOne') {
+        chatArea.push('<span class="text-info">'+ chat + '</span>');
+      }
+      if (player.id === 'playerTwo') {
+        chatArea.push('<span class="text-warning">'+ chat + '</span>');
+      }
+      // chatArea.push(chat);
+    }
   }
+  
+  chatArea.on('child_added', function (snapshot) {
+    var chatMsg = snapshot.val();
+    $('#chat-area').prepend('<p>' + chatMsg + '</p>');    
+  });
+
+  /*clear chat on firebase if disconnected*/
+  chatArea.on('child_removed', function () {
+    $('#chat-area').text('');
+  });
 
   $(document).on('click', '#start-btn', initialSetup);
   $(document).on('click', '#chat-btn', sendChat);

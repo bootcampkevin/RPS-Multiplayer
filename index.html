@@ -29,6 +29,8 @@
       <div class="row p-2">
         <div class="col p-4 text-center" id="header-board">    
           <h2 id="welcome">Please sign in...</h2>
+          <h5 class="d-none" id="result"></h5>
+          <h5 id="score"></h5>
           <h4 id="notification"></h4>
           <div class="row justify-content-center">
             <div id="sign-in" class="form-inline">
@@ -42,7 +44,7 @@
         <div class="col m-2 border text-center" id="player-left-div">
 
         </div>
-        <div class="col m-2 border text-center" id="player-middle-div">
+        <div class="col m-2 text-center" id="player-middle-div">
         
         </div>
         <div class="col m-2 border text-center" id="player-right-div">
@@ -50,11 +52,11 @@
         </div>
       </div>
       <!-- style="border: 1px solid #d2d2d2;"-->
-      <div class="row p-2 border" style="min-height:200px;">        
+      <div class="row p-2 border">        
         <div class="col-2">
 
         </div>
-        <div id="chat-area" class="col m-2 border">        
+        <div id="chat-area" class="col m-2 border chat">        
         </div>
         <div class="col-2">
         
@@ -63,7 +65,7 @@
       <div class="row p-2" id="chat-inputs">
         <div class="col-2"></div>           
             <div class="col">
-              <input id="chat-input" type="text" class="form-control mr-5" placeholder="Chat message here">
+              <input id="chat-input" type="text" class="form-control mr-5" placeholder="Chat message here...">
               
             </div>
             <div class="col-1">

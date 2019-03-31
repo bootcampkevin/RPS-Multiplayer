@@ -16,5 +16,12 @@ body{
     background: rgba(255, 0, 0, 0.3) /* Red background with 30% opacity */
 }
 .mid {
-    background: rgba(0, 153, 255, 0.3) /* Red background with 30% opacity */
+    /*background: rgba(0, 153, 255, 0.3)*/ /* Blue background with 30% opacity */
+    background-color: #ffffff;
+}
+.chat{
+    padding: 15px;
+    height: 300px;
+    overflow-y: scroll;        
+    line-height: 16px;
 }
