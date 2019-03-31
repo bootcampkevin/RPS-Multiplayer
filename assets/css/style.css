@@ -9,3 +9,12 @@ body{
     cursor: pointer;    
     border: 2px solid #d2d2d2;
 }
+.go {
+    background: rgba(76, 175, 80, 0.3) /* Green background with 30% opacity */
+}
+.stop {
+    background: rgba(255, 0, 0, 0.3) /* Red background with 30% opacity */
+}
+.mid {
+    background: rgba(0, 153, 255, 0.3) /* Red background with 30% opacity */
+}
