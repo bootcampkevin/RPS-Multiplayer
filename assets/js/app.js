@@ -1,9 +1,6 @@
 $(document).ready(function () {
   //
-  //MAJOR TODOs:
-  //TODO hitting twice so score goes up 2 per win/loss      
-  // tried moving checkForWin() to the .on pick selection, same issue  
-  //result text area gets affected. 
+  //This HW was rough. Way too much time getting a working game. Need to move onto Project 1. 
   //
   //
   //Global Variables, then Objects, then Function Calls, yo.
@@ -372,8 +369,8 @@ $(document).ready(function () {
     turn = 1;
     playerTurn.set(turn);
     
-    $('#left-choice').html('');
-    $('#right-choice').html('');
+    // $('#left-choice').html('');
+    // $('#right-choice').html('');
     //reset the imageDivs via setup
     setupGame();
   }
