@@ -29,8 +29,7 @@
       <div class="row p-2">
         <div class="col p-4 text-center" id="header-board">    
           <h2 id="welcome">Please sign in...</h2>
-          <h5 class="d-none" id="result"></h5>
-          <h5 id="score"></h5>
+          <h5 class="d-none" id="result"></h5>          
           <h4 id="notification"></h4>
           <div class="row justify-content-center">
             <div id="sign-in" class="form-inline">
@@ -40,19 +39,31 @@
           </div>
         </div>    
       </div>
-      <div class="row p-2 border" style="min-height:100px;">
+      <div class="row p-2 border-bottom-0" style="min-height:100px;">
         <div class="col m-2 border text-center" id="player-left-div">
 
         </div>
         <div class="col m-2 text-center" id="player-middle-div">
-        
+          <div class="row">
+            <div class="col" id="left-choice"></div>
+            <div class="col" id="right-choice"></div>
+          </div>
         </div>
         <div class="col m-2 border text-center" id="player-right-div">
         
         </div>
       </div>
+      
+      <div class="row">
+        <div class="col border rounded-right text-center" id="left-score"></div>
+        <div class="col"></div>
+        <div class="col border rounded-left text-center" id="right-score"></div>
+      </div>
+
+
+
       <!-- style="border: 1px solid #d2d2d2;"-->
-      <div class="row p-2 border">        
+      <div class="row p-2 border-top-0">        
         <div class="col-2">
 
         </div>

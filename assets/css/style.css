@@ -10,18 +10,23 @@ body{
     border: 2px solid #d2d2d2;
 }
 .go {
-    background: rgba(76, 175, 80, 0.3) /* Green background with 30% opacity */
+    background: rgba(76, 175, 80, 0.3); /* Green background with 30% opacity */
+    border-radius: 5px;
+    
 }
 .stop {
-    background: rgba(255, 0, 0, 0.3) /* Red background with 30% opacity */
+    /*background: rgba(255, 0, 0, 0.3);*/ /* Red background with 30% opacity */
+    background: rgba(225, 220, 0, 0.3); /* Yellow background with 30% opacity */
+    border-radius: 5px;
 }
 .mid {
-    /*background: rgba(0, 153, 255, 0.3)*/ /* Blue background with 30% opacity */
-    background-color: #ffffff;
+    /*background: rgba(0, 153, 255, 0.3); */ /* Blue background with 30% opacity */
+    
+    border-radius: 5px;
 }
 .chat{
     padding: 15px;
-    height: 300px;
+    height: 240px;
     overflow-y: scroll;        
     line-height: 16px;
 }

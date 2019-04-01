@@ -1,9 +1,9 @@
 $(document).ready(function () {
   //
   //MAJOR TODOs:
-  //TODO hitting twice so score goes up 2 per win/loss
-      //can hack the scores by dividing by 2 to mask the issue. 
-      // tried moving it in the on pick selection, same issue  
+  //TODO hitting twice so score goes up 2 per win/loss      
+  // tried moving checkForWin() to the .on pick selection, same issue  
+  //result text area gets affected. 
   //
   //
   //Global Variables, then Objects, then Function Calls, yo.
@@ -21,12 +21,13 @@ $(document).ready(function () {
 
   var player = { id: '', name: '' };
   var numberOfPlayers = 0;
+  var currentPlayer;
   var turn = 1;
   var player1pick = '';
   var player2pick = '';
-  var score1 = 0;
-  var score2 =0;
-  var delay = 3;
+  var player1score = 0;
+  var player2score = 0;
+  var delay = 4;
 
   var rockSVG = 'assets/images/rock.svg';
   var paperSVG = 'assets/images/paper-bl.svg';
@@ -34,8 +35,7 @@ $(document).ready(function () {
 
   function setupGame() {
     // turn = 1;
-    // playerTurn.set(turn);
-    $('#player-middle-div').html('');
+    // playerTurn.set(turn);    
     if (player.id === 'playerOne') {
       let div = makeImageDivs();
       $('#player-left-div').html(div);
@@ -43,9 +43,7 @@ $(document).ready(function () {
     else if (player.id === 'playerTwo') {
       let div = makeImageDivs();
       $('#player-right-div').html(div);
-    }
-    
-    $('#score').html('Player1 Wins: ' + score1 + ' & Player2 Wins: ' + score2);
+    }    
   }
 
   function makeImageDivs() {
@@ -66,8 +64,7 @@ $(document).ready(function () {
     img.addClass('selection m-1');
     div.append(img);
 
-    return div;
-
+    return div;    
   }
 
   function initialSetup() {
@@ -87,7 +84,7 @@ $(document).ready(function () {
   }
 
   function createNewPlayer(name) {
-    
+
     if ((numberOfPlayers === 0) || ((numberOfPlayers === 1) && (currentPlayer.hasOwnProperty('playerTwo')))) {
       playerOne.set({
         name: name,
@@ -98,7 +95,7 @@ $(document).ready(function () {
       player.id = 'playerOne';
       player.name = name;
       playerOne.onDisconnect().remove();
-      // setupGame();
+      
     }
     else if ((numberOfPlayers === 1) && (currentPlayer.hasOwnProperty('playerOne'))) {
       playerTwo.set({
@@ -110,23 +107,34 @@ $(document).ready(function () {
       player.id = 'playerTwo';
       player.name = name;
       playerTwo.onDisconnect().remove();
-      // setupGame();
+      
     }
     else if (numberOfPlayers >= 2) {
       console.log('No more than two players at a time.');
     }
   }
 
-  players.on("value", function (snapshot) {    
+  players.on("value", function (snapshot) {
     //TODO play more than one game at a time
     numberOfPlayers = snapshot.numChildren();
     $('#connections').text(numberOfPlayers);
     if (numberOfPlayers === 2) {
       playerTurn.set(turn);
     }
-    // set the current player id from firebase*/
+    // set the current player id from firebase
     currentPlayer = snapshot.val();
     // console.log(currentPlayer);
+  });
+
+  players.on('child_added', function (snapshot) {
+    //reset the player's scores when a player joins
+    if (numberOfPlayers >= 1) {
+      player1score = 0;
+      player2score = 0;
+
+      playerOne.update({ win: 0, loss: 0 });
+      playerTwo.update({ win: 0, loss: 0 });
+    }
   });
 
   // upon a player when disconnected, reset
@@ -137,25 +145,34 @@ $(document).ready(function () {
     playerTurn.remove();
     chatArea.remove();
     //TODO double check on clear all the divs
-    score1=0;
-    score2=0;
+    player1score = 0;
+    player2score = 0;
     $('#player-left-div').empty();
-    $('#player-middle-div').empty();
+    $('#player-middle-div').html('');
     $('#player-right-div').empty();
-    $('#notification').html('');
-    $('#score').html('');
+    $('#notification').html('');    
     $('#result').html('');
     newThrow();
 
   });
-  players.on('child_added', function(snapshot) {
-    //reset the player's scores when a player joins
-    if (numberOfPlayers >= 1) {
-      score1 = 0;
-      score2 = 0;
+
+  playerOne.on('value', function(snapshot) {
+    let name = snapshot.child('name').val();   
+    let win = snapshot.child('win').val();
+    let loss = snapshot.child('loss').val();
   
-      playerOne.update({win: 0, loss: 0});
-      playerTwo.update({win: 0, loss: 0});
+    if (name !== null) {     
+      $('#left-score').html('Wins: ' + win + ' Losses: ' + loss);
+    }
+  });
+
+  playerTwo.on('value', function(snapshot) { 
+    let name = snapshot.child('name').val();    
+    let win = snapshot.child('win').val();
+    let loss = snapshot.child('loss').val();
+  
+    if (name !== null) {     
+      $('#right-score').html('Wins: ' + win + ' Losses: ' + loss);
     }
   });
 
@@ -165,17 +182,18 @@ $(document).ready(function () {
     //TODO fix game flag and change options
     if (gameTurn === 1) {
       // console.log('GT: ' + gameTurn);
-      $('#player-middle-div').addClass('mid');
-      $('#player-left-div').removeClass('stop');
-      $('#player-left-div').addClass('go');
-      $('#player-right-div').removeClass('go');
-      $('#player-right-div').addClass('stop');
+      // $("#player-middle-div").addClass("mid");
+      $("#player-left-div").removeClass("stop");
+      $("#player-left-div").addClass("go");
+      $("#player-right-div").removeClass("go");
+      $("#player-right-div").addClass("stop");
 
-      if (player.id === 'playerOne') {
-        $('#notification').html('<span class="">It\'s your turn!</span>');
-      }
-      else {
-        $('#notification').html('<span class="">Waiting for Player 1...</span>');
+      if (player.id === "playerOne") {
+        $("#notification").html('<span class="text-success">It\'s your turn!</span>');
+      } else {
+        $("#notification").html(
+          '<span class="text-warning">Waiting for Player 1...</span>'
+        );
       }
     }
 
@@ -187,10 +205,10 @@ $(document).ready(function () {
       $('#player-right-div').addClass('go');
 
       if (player.id === 'playerTwo') {
-        $('#notification').html('<span class="">It\'s your turn!</span>');
+        $('#notification').html('<span class="text-success">It\'s your turn!</span>');
       }
       else {
-        $('#notification').html('<span class="">Waiting for Player 2...</span>');
+        $('#notification').html('<span class="text-warning">Waiting for Player 2...</span>');
       }
     }
 
@@ -199,63 +217,61 @@ $(document).ready(function () {
       $('#player-left-div').removeClass('stop');
       $('#player-right-div').removeClass('go');
       // $('#player-middle-div').addClass('mid');
-      $('#player-middle-div').html('<div class="card w-100 h-100 p-2">Player1 picked: ' + player1pick.toUpperCase() + ' & Player2 picked: ' + player2pick.toUpperCase() + ' </div>');
-      // console.log(player1pick);
-      // console.log(player2pick);
-
+      // $('#player-middle-div').html('<div class="card w-100 h-100 p-2">Player1 picked: ' + player1pick.toUpperCase() + ' & Player2 picked: ' + player2pick.toUpperCase() + ' </div>');
+      $('#left-choice').html('<div class="card bg-light w-100 h-100 p-2"><div class="card-header">Player1 picked:</div><div class="card-body"><p class="card-text">' + player1pick.toUpperCase() + '</p</div></div>');
+      $('#right-choice').html('<div class="card bg-light w-100 h-100 p-2"><div class="card-header">Player2 picked:</div><div class="card-body"><p class="card-text">' + player2pick.toUpperCase() + '</p></div></div>');
+           
       //TODO hitting twice so score goes up 2 per win/loss
       //can hack the scores by dividing by 2 to mask the issue. 
       // tried moving it in the on pick selection, same issue        
-      checkForWin();
+      // checkForWin();
     }
   });
 
   function checkForWin() {
-    // console.log('compare');
-
-
+    
     if ((player1pick !== null) && (player2pick !== null)) {
 
-    if (player1pick === player2pick) {
-      $('#result').html('<span class="">It\'s a Tie!</span>');
-      // console.log('turn:' + turn);
-      turn = 1;
-      playerTurn.set(turn);
-      setTimeout(newThrow, 1000 * delay);
+      if (player1pick === player2pick) {
+        $('#result').html('<span class="">It\'s a Tie!</span>');
+        // console.log('turn:' + turn);
+        turn = 3;
+        // playerTurn.set(turn);
+        setTimeout(newThrow, 1000 * delay);
 
-    }
-    else if (((player1pick === 'rock') && (player2pick === 'scissors')) || ((player1pick === 'paper') && (player2pick === 'rock')) || ((player1pick === 'scissors') && (player2pick === 'paper'))) {
+      }
+      else if (((player1pick === 'rock') && (player2pick === 'scissors')) || ((player1pick === 'paper') && (player2pick === 'rock')) || ((player1pick === 'scissors') && (player2pick === 'paper'))) {
 
-      $('#result').html('<span class="">Player 1 Wins!</span>');
-      
-      score1++;
-      
-      playerOne.update({ win: score1 });
-      playerTwo.update({ loss: score1 });
+        $('#result').html('<span class="">Player 1 Wins!</span>');
 
-      turn = 1;
-      playerTurn.set(turn);
-      setTimeout(newThrow, 1000 * delay);
-      
+        player1score++;
 
-    }
-    else if (((player2pick === 'rock') && (player1pick === 'scissors')) || ((player2pick === 'paper') && (player1pick === 'rock')) || ((player2pick === 'scissors') && (player1pick === 'paper'))) {
+        playerOne.update({ win: player1score });
+        playerTwo.update({ loss: player1score });
 
-      $('#result').html('<span class="">Player 2 Wins!</span>');      
+        turn = 3;
+        // playerTurn.set(turn);
+        setTimeout(newThrow, 1000 * delay);
 
-      score2++;
 
-      playerTwo.update({ win: score2 });
-      playerOne.update({ loss: score2 });
+      }
+      else if (((player2pick === 'rock') && (player1pick === 'scissors')) || ((player2pick === 'paper') && (player1pick === 'rock')) || ((player2pick === 'scissors') && (player1pick === 'paper'))) {
 
-      turn = 1;
-      playerTurn.set(turn);
-      setTimeout(newThrow, 1000 * delay);
-      
-    }
-    else {
-      // console.log('broken logic');
-    }
+        $('#result').html('<span class="">Player 2 Wins!</span>');
+
+        player2score++;
+
+        playerTwo.update({ win: player2score });
+        playerOne.update({ loss: player2score });
+
+        turn = 3;
+        // playerTurn.set(turn);
+        setTimeout(newThrow, 1000 * delay);
+
+      }
+      else {
+        // console.log('broken logic');
+      }
     }
 
 
@@ -294,9 +310,9 @@ $(document).ready(function () {
     }
   }
 
-  function updateTurn(){    
+  function updateTurn() {
     turn++;
-    playerTurn.set(turn);
+    //playerTurn.set(turn);
   }
 
   //Get the pick from DB for player one
@@ -306,18 +322,20 @@ $(document).ready(function () {
     //lag seems to be an issue with pick too quickly on firebase.
     //pick doesn't change if player picks the same choice as last choice.
     //remove() pick from firebase to fix issue. 
-    if (player1pick){    
-    updateTurn();
-    }    
+    if (player1pick) {
+      updateTurn();
+    }
+    checkForWin();
   });
 
   //Get the pick from DB for player two
   playerTwoPick.on('value', function (snapshot) {
     player2pick = snapshot.val();
     // console.log('p2picksnapshot: ' + player2pick);
-    if (player2pick){    
+    if (player2pick) {
       updateTurn();
     }
+    checkForWin();
   });
 
   function makeSelection() {
@@ -328,17 +346,17 @@ $(document).ready(function () {
     let currentPick = $(this).attr('data-name');
     if (numberOfPlayers === 2) {
       if ((player.id === 'playerOne') && (turn === 1)) {
-        
-        toggleImg(1, currentPick);        
-        playerOnePick.set(currentPick);        
+
+        toggleImg(1, currentPick);
+        playerOnePick.set(currentPick);
       }
-      else if ((player.id === 'playerTwo') && (turn === 2)) {        
-        toggleImg(2, currentPick);        
-        playerTwoPick.set(currentPick);       
+      else if ((player.id === 'playerTwo') && (turn === 2)) {
+        toggleImg(2, currentPick);
+        playerTwoPick.set(currentPick);
       }
       else {
         // console.log('broken selection');
-      }      
+      }
     }
   }
 
@@ -350,30 +368,35 @@ $(document).ready(function () {
     //clear out the player picks
     player1pick = '';
     player2pick = '';
-
+    
+    turn = 1;
+    playerTurn.set(turn);
+    
+    $('#left-choice').html('');
+    $('#right-choice').html('');
     //reset the imageDivs via setup
     setupGame();
   }
 
   function sendChat() {
-    console.log('Send Chat');
+    // console.log('Send Chat');
     let text = $('#chat-input').val().trim();
     $('#chat-input').val('');
     if (text.length > 0) {
       let chat = `${player.name}: ${text}`;
       if (player.id === 'playerOne') {
-        chatArea.push('<span class="text-info">'+ chat + '</span>');
+        chatArea.push('<span class="text-info">' + chat + '</span>');
       }
       if (player.id === 'playerTwo') {
-        chatArea.push('<span class="text-warning">'+ chat + '</span>');
+        chatArea.push('<span class="text-warning">' + chat + '</span>');
       }
       // chatArea.push(chat);
     }
   }
-  
+
   chatArea.on('child_added', function (snapshot) {
     var chatMsg = snapshot.val();
-    $('#chat-area').prepend('<p>' + chatMsg + '</p>');    
+    $('#chat-area').prepend('<p>' + chatMsg + '</p>');
   });
 
   /*clear chat on firebase if disconnected*/
