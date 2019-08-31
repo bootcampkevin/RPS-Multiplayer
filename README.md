@@ -1,4 +1,4 @@
 # RPS-Multiplayer
 
-## Link to Game
-[GITHUB](https://bootcampkevin.github.io/RPS-Multiplayer/index.html)
+## Link to Deployment
+[Deployed Project](https://kflan-io.github.io/RPS-Multiplayer/index.html)
